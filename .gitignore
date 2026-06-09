@@ -8,3 +8,5 @@
 !index.app.js
 !README.md
 !.gitignore
+!tests/
+!tests/*.js
