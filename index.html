@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>退休投資規劃系統</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#0b0f17; --panel:#121826; --panel2:#1a2235; --line:#243049;
+  --text:#e6edf3; --muted:#8b98ad; --accent:#4f8cff; --green:#2ecc8f;
+  --red:#ff5d6c; --gold:#f0b90b; --purple:#a78bfa;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft JhengHei",sans-serif;font-size:14px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.app{display:flex;min-height:100vh}
+.mtopbar,.mbackdrop{display:none}
+.sidebar{width:210px;background:var(--panel);border-right:1px solid var(--line);padding:18px 12px;position:fixed;top:0;bottom:0}
+.logo{font-size:17px;font-weight:700;padding:6px 10px 18px;color:var(--text)}
+.logo span{color:var(--accent)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:8px;color:var(--muted);cursor:pointer;margin-bottom:4px;font-size:14px}
+.nav-item:hover{background:var(--panel2);color:var(--text)}
+.nav-item.active{background:linear-gradient(90deg,rgba(79,140,255,.18),transparent);color:var(--accent);font-weight:600;border-left:3px solid var(--accent)}
+.main{flex:1;margin-left:210px;padding:22px 26px;max-width:1500px}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.page-sub{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .lab{color:var(--muted);font-size:12px;margin-bottom:6px}
+.kpi .val{font-size:21px;font-weight:700;letter-spacing:.3px}
+.kpi .sub{font-size:12px;margin-top:5px;color:var(--muted)}
+.up{color:var(--green)} .down{color:var(--red)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid32{display:grid;grid-template-columns:3fr 2fr;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)}
+.card h3 small{color:var(--muted);font-weight:400;margin-left:8px}
+canvas{max-width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--muted);font-weight:600;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td{padding:8px 10px;border-bottom:1px solid rgba(36,48,73,.5);text-align:right;white-space:nowrap}
+tr:hover td{background:rgba(79,140,255,.05)}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600}
+.tag.Stock{background:rgba(79,140,255,.15);color:var(--accent)}
+.tag.ETF{background:rgba(46,204,143,.15);color:var(--green)}
+.tag.Bond{background:rgba(167,139,250,.15);color:var(--purple)}
+.tag.Cash{background:rgba(240,185,11,.15);color:var(--gold)}
+.tag.buy{background:rgba(46,204,143,.15);color:var(--green)}
+.tag.sell{background:rgba(255,93,108,.15);color:var(--red)}
+.tag.hold{background:rgba(139,152,173,.15);color:var(--muted)}
+.field{margin-bottom:13px}
+.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+.field input,.field select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px 11px;font-size:14px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+.strategy{border:1px solid var(--line);border-radius:10px;padding:13px;cursor:pointer;background:var(--panel2)}
+.strategy:hover{border-color:var(--accent)}
+.strategy.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.strategy .nm{font-weight:700;font-size:13.5px;margin-bottom:4px}
+.strategy .ds{color:var(--muted);font-size:12px;line-height:1.5}
+.bar-mini{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:8px}
+.note-row{padding:9px 0;border-bottom:1px solid rgba(36,48,73,.5);font-size:12.5px}
+.note-row .d{color:var(--accent);font-weight:600;margin-right:10px}
+.disclaimer{color:var(--muted);font-size:11.5px;margin:10px 0 30px;line-height:1.6}
+.pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--muted);margin-right:6px}
+.conn-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+@media(max-width:1000px){.grid2,.grid32{grid-template-columns:1fr}.sidebar{width:64px}.sidebar .logo,.sidebar .nav-txt{display:none}.main{margin-left:64px}}
+
+/* ---- 手機版（responsive；同一檔案桌機/手機自適應） ---- */
+@media(max-width:760px){
+  .app{flex-direction:column}
+  .mtopbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:60;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 14px}
+  .mmenu-btn{background:none;border:none;color:var(--text);font-size:22px;line-height:1;cursor:pointer;padding:2px 6px}
+  .mtopbar-title{font-weight:600;font-size:15px}
+  .mbackdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:65}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:214px;height:auto;flex-direction:column;padding:18px 12px;border-right:1px solid var(--line);transform:translateX(-100%);transition:transform .22s ease;z-index:70;overflow-y:auto;background:var(--panel)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar .logo{display:block}
+  .sidebar .nav-item{flex:none;flex-direction:row;gap:9px;margin-bottom:4px;padding:12px;border-radius:8px;font-size:15px;justify-content:flex-start}
+  .sidebar .nav-item.active{border-left:3px solid var(--accent)}
+  .sidebar .nav-txt{display:inline;font-size:15px}
+  .sidebar > div:last-child{display:block}
+  .main{margin-left:0;padding:14px 12px 40px;max-width:100%}
+  .kpis{grid-template-columns:1fr 1fr;gap:10px}
+  .grid2,.grid32{grid-template-columns:1fr}
+  .grid32{display:flex;flex-direction:column}
+  .grid32 > div:nth-child(2){order:-1}
+  .page-title{font-size:18px}
+  .page-sub{font-size:12px}
+  .kpi .val{font-size:18px}
+  .card{padding:13px}
+  table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .field input,.field select,.btn{font-size:16px}
+  canvas{max-height:300px}
+}
+@media(max-width:420px){ .kpis{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SEED = null;
+</script>
+<script type="text/babel" src="index.app.js"></script>
+</body>
+</html>
