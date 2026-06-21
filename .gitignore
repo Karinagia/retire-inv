@@ -11,3 +11,19 @@
 !.gitignore
 !tests/
 !tests/*.js
+
+# --- AI-agent dev team (committed per decision 2026-06-21) ---
+!AGENT_TEAM_PLAN.md
+!AGENTS.md
+!CLAUDE.md
+!docs/
+!docs/*.md
+!specs/
+!specs/**
+!.claude/
+!.claude/agents/
+!.claude/agents/*.md
+!.claude/commands/
+!.claude/commands/*.md
+# …but NEVER publish local/secret agent config:
+.claude/settings.local.json
