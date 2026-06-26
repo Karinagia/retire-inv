@@ -63,6 +63,21 @@ MUST also carry a non-color cue (arrow/sign) — P7 forbids color-only encoding.
 Bond `#a78bfa` · Cash `#f0b90b`; `CAT_NAME` = 個股/ETF/債券/現金. **Chart series:** the 10-color
 `COLORS` array. Chart defaults: text `#8b98ad` (=`--muted`), grid `rgba(36,48,73,.6)` (≈`--line`).
 
+**Expense-category palette — `EXPENSE_CAT` (cash-flow 支出 6 類):** a **named subset of `COLORS`**,
+not new tokens (reuses the established chart palette → no hue duplication, no registry growth).
+Green/red are skipped on purpose so an expense category never collides with the gain/loss language.
+Mapping (居住/飲食/交通/教育/醫療/其他):
+| 類別 | label | Color | Role / rationale |
+|---|---|---|---|
+| housing | 居住 | `#4f8cff` (COLORS[0], blue) | largest fixed cost = anchor hue |
+| food | 飲食 | `#22d3ee` (COLORS[5], cyan) | high-contrast vs blue |
+| transport | 交通 | `#fb923c` (COLORS[6], orange) | distinct warm hue (not `--gold` warn) |
+| education | 教育 | `#a78bfa` (COLORS[2], purple) | accent-2 hue, clearly separable |
+| medical | 醫療 | `#e879f9` (COLORS[7], magenta) | distinct from red (never reads "danger") |
+| other | 其他 | `#94a3b8` (COLORS[9], slate) | neutral catch-all = "other" |
+Labels are **always present** (P7 — not color-only); colors are an at-a-glance aid only. Narrative +
+full rationale in `DESIGN.md §2.5 / §5`.
+
 ## Citation contract (NO GUESS)
 
 When a value or behavior traces to an authority, cite inline with a trust tier. The consumer
